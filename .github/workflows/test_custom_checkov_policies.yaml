@@ -39,20 +39,10 @@ jobs:
           BRANCH: ${{ steps.create-branch.outputs.branch }}
 
       - name: Wait for checkov check to complete
+        run: scripts/wait_for_checkov_check.sh
         env:
           GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
-        run: |
-          until RUN_ID=$(gh run list \
-            --repo govuk-one-login/devplatform-demo-sam-app \
-            --branch "$BRANCH" \
-            --workflow "pre-merge-checks.yaml" \
-            --json databaseId \
-            --jq '.[0].databaseId') && [ -n "$RUN_ID" ]; do
-            sleep 5
-          done
-          gh run watch "$RUN_ID" \
-            --repo govuk-one-login/devplatform-demo-sam-app \
-            --exit-status
+          BRANCH: ${{ steps.create-branch.outputs.branch }}
 
       - name: Close test PR and delete branch
         if: always()
