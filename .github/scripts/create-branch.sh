@@ -5,6 +5,7 @@ git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 BRANCH="checkov-integration-test-${RUN_ID}"
+echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 git checkout -b "$BRANCH"
 
 echo "# integration-test-${RUN_ID}" >> sam-app/template.yaml
