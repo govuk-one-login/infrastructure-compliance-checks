@@ -26,19 +26,9 @@ jobs:
           token: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
 
       - name: Create branch and modify CloudFormation template
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          BRANCH="checkov-integration-test-${{ github.run_id }}"
-          git checkout -b "$BRANCH"
-
-          echo "# integration-test-${{ github.run_id }}" >> sam-app/template.yaml
-
-          git add sam-app/template.yaml
-          git commit -m "test: trigger checkov scan for integration test run ${{ github.run_id }}"
-          git push origin "$BRANCH"
-          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+        run: scripts/create_test_branch.sh
+        env:
+          RUN_ID: ${{ github.run_id }}
 
       - name: Raise PR on target repo
         env:
