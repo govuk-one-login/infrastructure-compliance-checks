@@ -46,10 +46,7 @@ jobs:
 
       - name: Close test PR and delete branch
         if: always()
+        run: scripts/clean_up.sh
         env:
           GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
-        run: |
-          gh pr close "$PR_URL" \
-            --repo govuk-one-login/devplatform-demo-sam-app \
-            --delete-branch \
-            --comment "Closed by automated integration test." || true
+          PR_URL: ${{ steps.raise-pr.outputs.pr_url }}
