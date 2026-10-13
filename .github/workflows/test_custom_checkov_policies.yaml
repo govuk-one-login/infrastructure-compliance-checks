@@ -12,11 +12,16 @@ permissions:
   contents: read
 
 jobs:
-  integration-test:
+  integration-test-pass:
     name: Integration test against devplatform-demo-sam-app
     environment: development
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout security-checks
+        uses: actions/checkout@v4
+        with:
+          path: security-checks
+
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
@@ -24,29 +29,83 @@ jobs:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
+          path: devplatform-demo-sam-app
 
       - name: Create branch and modify CloudFormation template
         id: create-branch
-        run: scripts/create_test_branch.sh
+        run: security-checks/.github/scripts/create-branch.sh
         env:
           RUN_ID: ${{ github.run_id }}
 
       - name: Raise PR on target repo
         id: raise-pr
-        run: scripts/raise_test_pr.sh
+        run: security-checks/.github/scripts/raise-pr.sh
         env:
           GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
           BRANCH: ${{ steps.create-branch.outputs.branch }}
+          RUN_ID: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          PR_TYPE: "expected: pass"
 
       - name: Wait for checkov check to complete
-        run: scripts/wait_for_checkov_check.sh
+        run: security-checks/.github/scripts/wait-for-check.sh
         env:
           GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
           BRANCH: ${{ steps.create-branch.outputs.branch }}
 
       - name: Close test PR and delete branch
         if: always()
-        run: scripts/clean_up.sh
+        run: security-checks/.github/scripts/clean-up.sh
+        env:
+          GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
+          PR_URL: ${{ steps.raise-pr.outputs.pr_url }}
+
+  integration-test-fail:
+    name: Integration test - expect checkov failure
+    environment: development
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout security-checks
+        uses: actions/checkout@v4
+        with:
+          path: security-checks
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: govuk-one-login/devplatform-demo-sam-app
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
+          path: devplatform-demo-sam-app
+
+      - name: Create branch for failing test
+        id: create-branch
+        run: security-checks/.github/scripts/create-failing-branch.sh
+        env:
+          RUN_ID: ${{ github.run_id }}
+
+      - name: Raise PR on target repo
+        id: raise-pr
+        run: security-checks/.github/scripts/raise-pr.sh
+        env:
+          GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
+          BRANCH: ${{ steps.create-branch.outputs.branch }}
+          RUN_ID: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          PR_TYPE: "expected: fail"
+
+      - name: Wait for checkov check to fail
+        run: security-checks/.github/scripts/wait-for-checkov-failure.sh
+        env:
+          GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
+          BRANCH: ${{ steps.create-branch.outputs.branch }}
+
+      - name: Close test PR and delete branch
+        if: always()
+        run: security-checks/.github/scripts/clean-up.sh
         env:
           GH_TOKEN: ${{ secrets.DEMO_SAM_APP_SECURITY_CHECKS_TEST }}
           PR_URL: ${{ steps.raise-pr.outputs.pr_url }}
