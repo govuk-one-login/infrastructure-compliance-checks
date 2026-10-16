@@ -12,5 +12,6 @@ PR_URL=$(gh pr create \
   --title "DO NOT MERGE - Automated checkov integration test [${PR_TYPE}] #${RUN_ID}" \
   --body "Please do not merge. This is an an automated intergration test from ${REPOSITORY}@${SHA}." \
   --base main \
-  --head "$BRANCH")
+  --head "$BRANCH" \
+  --draft) # Added draft flag to avoid GitHub notifications for test PRs
 echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
