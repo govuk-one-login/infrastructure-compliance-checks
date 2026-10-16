@@ -4,7 +4,7 @@ set -euo pipefail
 : "${BRANCH:?BRANCH is required}"
 
 until WORKFLOW_RUN_ID=$(gh run list \
-  --repo govuk-one-login/devplatform-demo-sam-app \
+  --repo "${TARGET_REPO}" \
   --branch "$BRANCH" \
   --workflow "pre-merge-checks.yaml" \
   --json databaseId \
@@ -13,10 +13,10 @@ until WORKFLOW_RUN_ID=$(gh run list \
 done
 
 gh run watch "$WORKFLOW_RUN_ID" \
-  --repo govuk-one-login/devplatform-demo-sam-app || true
+  --repo "${TARGET_REPO}" || true
 
 CONCLUSION=$(gh run view "$WORKFLOW_RUN_ID" \
-  --repo govuk-one-login/devplatform-demo-sam-app \
+  --repo "${TARGET_REPO}" \
   --json conclusion \
   --jq '.conclusion')
 

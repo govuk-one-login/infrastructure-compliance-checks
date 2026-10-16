@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   pull_request:
 
+env:
+  TARGET_REPO: govuk-one-login/devplatform-demo-sam-app
+
 concurrency:
   group: test-custom-checkov-policies-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true

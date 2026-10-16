@@ -8,7 +8,7 @@ set -euo pipefail
 : "${PR_TYPE:?PR_TYPE is required}"
 
 PR_URL=$(gh pr create \
-  --repo govuk-one-login/devplatform-demo-sam-app \
+  --repo "${TARGET_REPO}" \
   --title "DO NOT MERGE - Automated checkov integration test [${PR_TYPE}] #${RUN_ID}" \
   --body "Please do not merge. This is an an automated intergration test from ${REPOSITORY}@${SHA}." \
   --base main \
