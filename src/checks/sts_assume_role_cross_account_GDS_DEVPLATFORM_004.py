@@ -4,6 +4,7 @@ from helpers import get_policy_documents, matches_with_wildcard
 
 ASSUME_ROLE_ACTION = "sts:AssumeRole"
 PRINCIPAL_ORG_ID_KEY = "aws:PrincipalOrgID"
+VIA_AWS_SERVICE = "aws:ViaAWSService"
 ROLE_ARN_MARKER = ":role/"
 
 
@@ -66,6 +67,27 @@ def _has_principal_org_id(condition):
     )
 
 
+def _has_via_aws_service(condition):
+    if not isinstance(condition, dict):
+        return False
+    return any(
+        isinstance(block, dict) and VIA_AWS_SERVICE in block
+        for block in condition.values()
+    )
+
+
+def _via_aws_service_is_true(condition):
+    return any(
+        isinstance(block, dict)
+        and str(block.get(VIA_AWS_SERVICE)).strip().lower() == "true"
+        for block in condition.values()
+    )
+
+
+def _via_aws_service_valid(condition):
+    return _has_via_aws_service(condition) and _via_aws_service_is_true(condition)
+
+
 def _grants_assume_role(statement):
     return any(
         matches_with_wildcard(action, ASSUME_ROLE_ACTION)
@@ -106,7 +128,9 @@ class STSAssumeRoleCrossAccountOrgID(BaseResourceCheck):
         super().__init__(
             name=(
                 "Ensure cross-account sts:AssumeRole trust policies are scoped to "
-                "the organisation with an aws:PrincipalOrgID condition, and that "
+                "the organisation with an aws:PrincipalOrgID condition and require "
+                "an aws:ViaAWSService condition set to true so roles cannot be "
+                "assumed directly without an AWS service intermediary, and that "
                 "identity-based policies granting sts:AssumeRole target explicit "
                 "role ARNs (ADR 0226)"
             ),
@@ -132,7 +156,10 @@ class STSAssumeRoleCrossAccountOrgID(BaseResourceCheck):
             if not _trusts_cross_account(statement):
                 continue
 
-            if not _has_principal_org_id(statement.get("Condition", {})):
+            condition = statement.get("Condition", {})
+            if not _has_principal_org_id(condition):
+                return CheckResult.FAILED
+            if not _via_aws_service_valid(condition):
                 return CheckResult.FAILED
 
         for doc in get_policy_documents(conf):

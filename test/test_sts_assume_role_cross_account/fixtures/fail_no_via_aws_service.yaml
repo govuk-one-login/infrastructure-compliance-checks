@@ -1,0 +1,24 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  FAIL: cross-account trust policy is scoped with aws:PrincipalOrgID but omits
+  the aws:ViaAWSService condition entirely. ADR 0226 Rule 2 requires the
+  condition to be present (set to true); legitimate exceptions must instead be
+  documented via an inline Checkov suppression.
+Parameters:
+  OrganisationId:
+    Type: String
+    Description: The aws:PrincipalOrgID of the GOV.UK One Login AWS organisation.
+Resources:
+  MissingViaServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::111122223333:role/consumer-lambda-execution-role"
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: !Ref OrganisationId

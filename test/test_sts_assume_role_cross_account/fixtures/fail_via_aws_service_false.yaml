@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  FAIL: cross-account trust policy is scoped with aws:PrincipalOrgID but sets
+  aws:ViaAWSService to false, explicitly permitting direct, non-service
+  cross-account assumption, which ADR 0226 prohibits.
+Parameters:
+  OrganisationId:
+    Type: String
+    Description: The aws:PrincipalOrgID of the GOV.UK One Login AWS organisation.
+Resources:
+  ViaServiceFalseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::111122223333:role/consumer-lambda-execution-role"
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: !Ref OrganisationId
+              Bool:
+                aws:ViaAWSService: "false"

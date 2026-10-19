@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: cross-account trust policy is scoped with aws:PrincipalOrgID and also
+  requires aws:ViaAWSService, so the role can only be assumed via an AWS service
+  intermediary (ADR 0226).
+Parameters:
+  OrganisationId:
+    Type: String
+    Description: The aws:PrincipalOrgID of the GOV.UK One Login AWS organisation.
+Resources:
+  ProxyLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "arn:aws:iam::111122223333:role/consumer-lambda-execution-role"
+            Action: "sts:AssumeRole"
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: !Ref OrganisationId
+              Bool:
+                aws:ViaAWSService: "true"
