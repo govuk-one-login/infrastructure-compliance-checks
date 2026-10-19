@@ -7,7 +7,7 @@ The policies are written as [Checkov](https://www.checkov.io/) custom checks and
 
 ## What the action does
 
-`.github/actions/custom-checkov-policies runs a Checkov scan of your templates using both the standard Checkov rule set and the custom DevPlatform checks in [`src/checks`](src/checks). In a single job step it:
+`actions/custom-checkov-policies` runs a Checkov scan of your templates using both the standard Checkov rule set and the custom DevPlatform checks in [`src/checks`](src/checks). In a single job step it:
 
 1. Checks out this repository into `.security-checks` so the custom checks are available locally.
 2. Works out which `*.yaml` files changed on the branch (`git diff --name-only origin/main...HEAD`) so only modified templates are scanned.
@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0 # required so the action can diff against origin/main
 
       - name: Security checks
-        uses: govuk-one-login/security-checks/.github/actions/custom-checkov-policies@v1
+        uses: govuk-one-login/security-checks/actions/custom-checkov-policies@123456789ghsha # v1
         with:
           framework: cloudformation
           ref: v1
