@@ -1,4 +1,4 @@
-# security-checks
+# infrastructure-compliance-checks
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 The Security Checks repository holds a suite of custom policies designed to enforce security and compliance standards for application teams deploying through DevPlatform's Secure Pipelines.
@@ -9,11 +9,11 @@ The policies are written as [Checkov](https://www.checkov.io/) custom checks and
 
 `actions/custom-checkov-policies` runs a Checkov scan of your templates using both the standard Checkov rule set and the custom DevPlatform checks in [`src/checks`](src/checks). In a single job step it:
 
-1. Checks out this repository into `.security-checks` so the custom checks are available locally.
+1. Checks out this repository into `.infrastructure-compliance-checks` so the custom checks are available locally.
 2. Works out which `*.yaml` files changed on the branch (`git diff --name-only origin/main...HEAD`) so only modified templates are scanned.
 3. Installs Checkov on Python 3.12.
-4. Runs Checkov against the changed files with `--external-checks-dir .security-checks/src/checks/`, writing results to the console and to `results.sarif`.
-5. Uploads `results.sarif` to GitHub code scanning under the category `security-checks`. This runs on success or failure, so findings are always published.
+4. Runs Checkov against the changed files with `--external-checks-dir .infrastructure-compliance-checks/src/checks/`, writing results to the console and to `results.sarif`.
+5. Uploads `results.sarif` to GitHub code scanning under the category `infrastructure-compliance-checks`. This runs on success or failure, so findings are always published.
 
 A policy failure **fails the step and the pull request check**. Findings are printed in the job log and also appear in the repository's **Security → Code scanning** tab, annotated against the offending lines. To ship a template that a check flags, either fix the template or add a Checkov [inline suppression](https://www.checkov.io/2.Basics/). Teams should get security to review and sign off any inline suppressions (or [metadata](https://www.checkov.io/2.Basics/Suppressing%20and%20Skipping%20Policies.html#cloudformation-metadata)).
 
@@ -35,7 +35,7 @@ jobs:
           fetch-depth: 0 # required so the action can diff against origin/main
 
       - name: Security checks
-        uses: govuk-one-login/security-checks/actions/custom-checkov-policies@123456789ghsha # v1
+        uses: govuk-one-login/infrastructure-compliance-checks/actions/custom-checkov-policies@123456789ghsha # v1
         with:
           framework: cloudformation
           ref: v1
