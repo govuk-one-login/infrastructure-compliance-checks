@@ -22,6 +22,8 @@ Resources:
             Condition:
               StringEquals:
                 aws:PrincipalOrgID: !Ref OrganisationId
+              Bool:
+                aws:ViaAWSService: "true"
       Policies:
         - PolicyName: least-privilege-read
           PolicyDocument:

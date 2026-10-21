@@ -32,6 +32,25 @@ class TestSTSAssumeRoleCrossAccount(unittest.TestCase):
         self.assertIn(CHECK_ID, failed)
         self.assertNotIn(CHECK_ID, passed)
 
+    def test_pass_trust_policy_via_aws_service(self):
+        passed, failed = run_check(
+            FIXTURES / "pass_trust_policy_via_aws_service.yaml", CHECK_ID
+        )
+        self.assertIn(CHECK_ID, passed)
+        self.assertNotIn(CHECK_ID, failed)
+
+    def test_fail_no_via_aws_service(self):
+        passed, failed = run_check(FIXTURES / "fail_no_via_aws_service.yaml", CHECK_ID)
+        self.assertIn(CHECK_ID, failed)
+        self.assertNotIn(CHECK_ID, passed)
+
+    def test_fail_via_aws_service_false(self):
+        passed, failed = run_check(
+            FIXTURES / "fail_via_aws_service_false.yaml", CHECK_ID
+        )
+        self.assertIn(CHECK_ID, failed)
+        self.assertNotIn(CHECK_ID, passed)
+
     def test_fail_bare_root_no_org_id(self):
         passed, failed = run_check(FIXTURES / "fail_bare_root_no_org_id.yaml", CHECK_ID)
         self.assertIn(CHECK_ID, failed)
