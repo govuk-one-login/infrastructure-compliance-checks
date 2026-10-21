@@ -6,6 +6,10 @@ inputs:
     description: The framework of the templates to scan
     required: false
     default: cloudformation
+  pull-repository:
+    description: Whether to checkout the calling repository before scanning
+    required: false
+    default: 'false'
   ref:
     description: The ref (tag/branch) of infrastructure-compliance-checks to load checks from
     required: false
@@ -14,7 +18,13 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout infrastructure-compliance-checks repo (to get custom checks)
+    - name: Pull repository
+      if: ${{ inputs.pull-repository == 'true' }}
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: '0'
+
+    - name: Pull infrastructure-compliance-checks repo (to get custom checks)
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: govuk-one-login/infrastructure-compliance-checks
