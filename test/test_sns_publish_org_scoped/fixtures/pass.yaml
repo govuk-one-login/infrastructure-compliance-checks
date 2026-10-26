@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: application Lambda execution role grants sns:Publish to a cross-account
+  SNS topic scoped to the AWS organisation via aws:PrincipalOrgID.
+Parameters:
+  OrganisationId:
+    Type: String
+Resources:
+  AppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: sns-publish
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "sns:Publish"
+                Resource:
+                  - "arn:aws:sns:eu-west-2:*:my-topic"
+                Condition:
+                  StringEquals:
+                    aws:PrincipalOrgID: !Ref OrganisationId
