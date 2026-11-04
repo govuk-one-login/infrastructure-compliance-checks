@@ -36,19 +36,29 @@ runs:
       id: diff
       shell: bash
       run: |
-        FILES=$(git diff --name-only origin/main...HEAD -- '*.yaml' | tr '\n' ' ')
-        echo "files=$FILES" >> "$GITHUB_OUTPUT"
+        changed_files=$(git diff --name-only origin/main...HEAD -- '*.yaml' '*.yml' | tr '\n' ' ')
+        if [ -z "$changed_files" ]; then
+          echo "has_files=false" >> "$GITHUB_OUTPUT"
+          echo "files=" >> "$GITHUB_OUTPUT"
+          echo "No changed files to scan; skipping Checkov."
+        else
+          echo "has_files=true" >> "$GITHUB_OUTPUT"
+          echo "files=$changed_files" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Setup Python
+      if: steps.diff.outputs.has_files == 'true'
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: '3.12' # This is the latest version of Python supported by Checkov
 
     - name: Install Checkov
+      if: steps.diff.outputs.has_files == 'true'
       shell: bash
       run: pip install checkov
 
     - name: Run Checkov
+      if: steps.diff.outputs.has_files == 'true'
       shell: bash
       run: |
         checkov -f ${{ steps.diff.outputs.files }} \
@@ -59,7 +69,7 @@ runs:
           --output-file-path console,results.sarif
 
     - name: Upload SARIF results
-      if: always()
+      if: always() && hashFiles('results.sarif') != ''
       uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
       with:
         sarif_file: results.sarif
