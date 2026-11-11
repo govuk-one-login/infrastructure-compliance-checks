@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  FAIL: sns:Publish against wildcard-account ARN without aws:ResourceAccount condition.
+Resources:
+  SNSPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sns:Publish
+            Resource: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:*:*"
