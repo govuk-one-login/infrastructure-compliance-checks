@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: sns:Publish against wildcard-account ARN with aws:ResourceAccount condition.
+Parameters:
+  AccessCrossAccountSNS:
+    Type: String
+Resources:
+  SNSPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sns:Publish
+            Resource: !Sub "arn:${AWS::Partition}:sns:${AWS::Region}:*:*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:ResourceAccount: !Ref AccessCrossAccountSNS

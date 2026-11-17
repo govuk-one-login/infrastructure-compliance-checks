@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: acm-pca:DescribeCertificateAuthority against wildcard-account ARN with aws:ResourceAccount condition.
+Parameters:
+  AccessRootCertificateAuthorityAccounts:
+    Type: String
+Resources:
+  AcmPcaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - acm-pca:DescribeCertificateAuthority
+            Resource: !Sub "arn:${AWS::Partition}:acm-pca:${AWS::Region}:*:certificate-authority/*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:ResourceAccount: !Ref AccessRootCertificateAuthorityAccounts

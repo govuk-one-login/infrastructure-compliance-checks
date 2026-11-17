@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  FAIL: acm-pca:DescribeCertificateAuthority against wildcard-account ARN without aws:ResourceAccount condition.
+Resources:
+  AcmPcaPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - acm-pca:DescribeCertificateAuthority
+            Resource: !Sub "arn:${AWS::Partition}:acm-pca:${AWS::Region}:*:certificate-authority/*"

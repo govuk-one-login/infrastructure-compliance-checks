@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: DynamoDB actions against wildcard-account ARN with aws:ResourceAccount condition.
+Parameters:
+  AccessCrossAccountDynamoDB:
+    Type: String
+Resources:
+  DynamoDBPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:*:table/*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:ResourceAccount: !Ref AccessCrossAccountDynamoDB

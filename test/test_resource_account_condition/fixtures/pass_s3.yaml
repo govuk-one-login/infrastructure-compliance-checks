@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  PASS: S3 actions against cross-account bucket ARN with aws:ResourceAccount condition.
+Parameters:
+  AccessCrossAccountS3:
+    Type: String
+Resources:
+  S3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:DeleteObject
+              - s3:AbortMultipartUpload
+            Resource: "arn:aws:s3:::my-cross-account-bucket/*"
+            Condition:
+              ForAnyValue:StringEquals:
+                aws:ResourceAccount: !Ref AccessCrossAccountS3
